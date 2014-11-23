@@ -195,6 +195,19 @@ var Suite = function ( Validator, expect, extras ) {
         expect( validate( 'foo bar baz', assert ).show() ).to.eql( { assert: 'Length', value: 'foo bar baz', violation: { max: 10 } } );
       } )
 
+      it( 'ExactLength', function () {
+        assert = new Assert().ExactLength( 5 );
+
+        expect( validate( null, assert ) ).not.to.be( true );
+        expect( validate( '', assert ) ).not.to.be( true );
+        expect( validate( false, assert ) ).not.to.be( true );
+        expect( validate( false, assert ).show() ).to.eql( { assert: 'ExactLength', value: false, violation: { value: 'must_be_a_string_or_array' } } );
+        expect( validate( 'abcde', assert ) ).to.be( true );
+        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'ExactLength', value: 'foo', violation: { length: 5 } } );
+        expect( validate( 'f', assert ) ).not.to.be( true );
+
+      } )
+
       it( 'Length for arrays', function () {
         assert = new Assert().Length( { min: 3, max: 5 } );
         expect( validator.validate([], assert) ).not.to.be( true );
@@ -429,6 +442,54 @@ var Suite = function ( Validator, expect, extras ) {
 
         expect( validate( 'foo', assert ) ).to.be( true );
         expect( validate( 'FOO', assert ) ).to.be( true );
+      } )
+
+      it( 'Url', function () {        
+        assert = new Assert().Url( );
+
+        expect( validate( 'foo', assert ) ).not.to.be( true );
+        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'Url', value: 'foo' } );
+        expect( validate( 'http://www.example.com', assert ) ).to.be( true );
+        expect( validate( 'https://www.example.com', assert ) ).to.be( true );
+        expect( validate( 'http://www.example.com/about', assert ) ).to.be( true );
+        expect( validate( 'http://www.example.com/about.html', assert ) ).to.be( true );
+        expect( validate( 'http://www.example.com/about?id=12345', assert ) ).to.be( true );        
+
+      } )
+
+      it( 'PhoneNumber', function () {        
+        assert = new Assert().PhoneNumber( );
+
+        expect( validate( 'foo', assert ) ).not.to.be( true );
+        expect( validate( 'foo', assert ).show() ).to.eql( { assert: 'PhoneNumber', value: 'foo' } );
+        expect( validate( '+44 (0) 20 7925 0918', assert ) ).to.be( true );
+        expect( validate( '+1 202-456-1111', assert ) ).to.be( true );
+        expect( validate( '+12024561111', assert ) ).to.be( true );
+
+      } )
+
+      it( 'MultipleEmails', function () {        
+        assert = new Assert().MultipleEmails( ',' );
+
+        expect( validate( 'foo', assert ) ).not.to.be( true );
+        expect( validate( 'joe@bloggs.com', assert ) ).to.be( true );
+        expect( validate( 'joe@bloggs.com,bob@building.com', assert ) ).to.be( true );
+        expect( validate( 'joe@bloggs.com,bob@building.com,harry@thepalace.com', assert ) ).to.be( true );
+        expect( validate( 'joe@bloggs.com,foo', assert ) ).not.to.be( true );
+        expect( validate( 'foo,joe@bloggs.com,bar', assert ) ).not.to.be( true );
+        expect( validate( 'foo,joe@bloggs.com,bar', assert ).show() ).to.eql( { assert: 'MultipleEmails', value: 'foo,joe@bloggs.com,bar', violation: { invalid: [ 'foo', 'bar' ] } } );
+
+        assert = new Assert().MultipleEmails( '|' );
+
+        expect( validate( 'foo', assert ) ).not.to.be( true );
+        expect( validate( 'joe@bloggs.com', assert ) ).to.be( true );
+        expect( validate( 'joe@bloggs.com,bob@building.com', assert ) ).not.to.be( true );
+        expect( validate( 'joe@bloggs.com|bob@building.com', assert ) ).to.be( true );
+        expect( validate( 'joe@bloggs.com|bob@building.com|harry@thepalace.com', assert ) ).to.be( true );
+        expect( validate( 'joe@bloggs.com|foo', assert ) ).not.to.be( true );
+        expect( validate( 'foo|joe@bloggs.com|bar', assert ) ).not.to.be( true );
+        expect( validate( 'foo|joe@bloggs.com|bar', assert ).show() ).to.eql( { assert: 'MultipleEmails', value: 'foo|joe@bloggs.com|bar', violation: { invalid: [ 'foo', 'bar' ] } } );
+
       } )
 
       it( 'Range', function () {
